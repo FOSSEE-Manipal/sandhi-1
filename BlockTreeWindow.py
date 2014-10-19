@@ -56,6 +56,9 @@ class BlockTreeWindow(gtk.VBox):
 		self.treestore = gtk.TreeStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
 		self.treeview = gtk.TreeView(self.treestore)
 		self.treeview.set_enable_search(False) #disable pop up search box
+		#adding the selected block on enter key being pressed
+		self.treeview.add_events(gtk.gdk.KEY_PRESS_MASK)
+		self.treeview.connect('key-press-event',self._handle_key_press)
 		self.treeview.add_events(gtk.gdk.BUTTON_PRESS_MASK)
 		self.treeview.connect('button-press-event', self._handle_mouse_button_press)
 		selection = self.treeview.get_selection()
@@ -80,15 +83,15 @@ class BlockTreeWindow(gtk.VBox):
 		scrolled_window.set_size_request(DEFAULT_BLOCKS_WINDOW_WIDTH, -1)
 		self.pack_start(scrolled_window)
 		#add button
-#		self.add_button = gtk.Button(None, gtk.STOCK_ADD)
-#		self.add_button.connect('clicked', self._handle_add_button)
-#		self.pack_start(self.add_button, False)
+		self.add_button = gtk.Button(None, gtk.STOCK_ADD)
+		self.add_button.connect('clicked', self._handle_add_button)
+		self.pack_start(self.add_button, False)
 		#map categories to iters, automatic mapping for root
 		self._categories = {tuple(): None}
 		#add blocks and categories
 		self.platform.load_block_tree(self)
 		#initialize
-#		self._update_add_button()
+		self._update_add_button()
 
 	def clear(self):
 		self.treestore.clear();
@@ -135,13 +138,13 @@ class BlockTreeWindow(gtk.VBox):
 		treestore, iter = selection.get_selected()
 		return iter and treestore.get_value(iter, KEY_INDEX) or ''
 
-#	def _update_add_button(self):
+	def _update_add_button(self):
 		"""
 		Update the add button's sensitivity.
 		The button should be active only if a block is selected.
 		"""
-#		key = self._get_selected_block_key()
-#		self.add_button.set_sensitive(bool(key))
+		key = self._get_selected_block_key()
+		self.add_button.set_sensitive(bool(key))
 
 	def _add_selected_block(self):
 		"""
@@ -177,6 +180,14 @@ class BlockTreeWindow(gtk.VBox):
 		"""
 		key = self._get_selected_block_key()
 		if key: selection_data.set(selection_data.target, 8, key)
+	
+	def _handle_key_press(self, widget, event):
+		"""
+		Handle the enter key press.
+		If enter key is pressed, call add selected block.
+		"""
+		if gtk.gdk.keyval_name(event.keyval) == 'Return'  and event.type == gtk.gdk.KEY_PRESS:
+			self._add_selected_block()
 
 	def _handle_mouse_button_press(self, widget, event):
 		"""
@@ -193,9 +204,9 @@ class BlockTreeWindow(gtk.VBox):
 		"""
 		self._update_add_button()
 
-#	def _handle_add_button(self, widget):
+	def _handle_add_button(self, widget):
 		"""
 		Handle the add button clicked signal.
 		Call add selected block.
 		"""
-#		self._add_selected_block()
+		self._add_selected_block()
