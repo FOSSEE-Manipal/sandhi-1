@@ -200,13 +200,13 @@ class Block(Element):
 			self.new_pixbuf = gtk.gdk.pixbuf_new_from_file(self.image_path)
 			Element.draw_image(
 			self, gc, window, bg_color=self._bg_color,
-			border_color=self.is_highlighted() and Colors.HIGHLIGHT_COLOR or Colors.BORDER_COLOR, pixbuf = self.new_pixbuf
+			border_color=self.is_highlighted() and Colors.HIGHLIGHT_COLOR_BLOCK or Colors.BORDER_COLOR, pixbuf = self.new_pixbuf
 			)
 		
 		else:
 			Element.draw(
 			self, gc, window, bg_color=self._bg_color,
-			border_color=self.is_highlighted() and Colors.HIGHLIGHT_COLOR or Colors.BORDER_COLOR,
+			border_color=self.is_highlighted() and Colors.HIGHLIGHT_COLOR_BLOCK or Colors.BORDER_COLOR,
 			)
 		#draw label image
 		if self.is_horizontal():
