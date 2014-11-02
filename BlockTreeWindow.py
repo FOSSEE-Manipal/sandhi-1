@@ -55,8 +55,8 @@ class BlockTreeWindow(gtk.VBox):
 		#parse custom tree style to allow odd and even colour
                 gtk.rc_parse_string( """
                  style "custom-treestyle"{
-                         GtkTreeView::odd-row-color = "#e7e6dd"
-                         GtkTreeView::even-row-color = "#b5cbbb"
+                         GtkTreeView::odd-row-color = "#b5cbbb"
+                         GtkTreeView::even-row-color = "#ddedf4"
                          GtkTreeView::allow-rules = 1
                  }
                  widget "*custom_treeview*" style "custom-treestyle"
