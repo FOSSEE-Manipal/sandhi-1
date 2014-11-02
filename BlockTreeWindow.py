@@ -52,9 +52,22 @@ class BlockTreeWindow(gtk.VBox):
 		gtk.VBox.__init__(self)
 		self.platform = platform
 		self.get_flow_graph = get_flow_graph
+		#parse custom tree style to allow odd and even colour
+                gtk.rc_parse_string( """
+                 style "custom-treestyle"{
+                         GtkTreeView::odd-row-color = "#e7e6dd"
+                         GtkTreeView::even-row-color = "#b5cbbb"
+                         GtkTreeView::allow-rules = 1
+                 }
+                 widget "*custom_treeview*" style "custom-treestyle"
+                 """)
+
 		#make the tree model for holding blocks
 		self.treestore = gtk.TreeStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
 		self.treeview = gtk.TreeView(self.treestore)
+		#set name to allow modified treeview
+		self.treeview.set_name("custom_treeview" )
+		self.treeview.set_rules_hint( True ) #allows alternating colours
 		self.treeview.set_enable_search(False) #disable pop up search box
 		#adding the selected block on enter key being pressed
 		self.treeview.add_events(gtk.gdk.KEY_PRESS_MASK)
@@ -67,9 +80,15 @@ class BlockTreeWindow(gtk.VBox):
 		renderer = gtk.CellRendererText()
 		column = gtk.TreeViewColumn('Blocks', renderer, text=NAME_INDEX)
 		self.treeview.append_column(column)
+		#format the font in the treeview
+		renderer.set_property('foreground', 'black')
+                renderer.set_property('xpad', 10)
+                renderer.set_property('weight', 3000)
+                renderer.set_property('family', 'Sans')
 		#setup the search
 		self.treeview.set_enable_search(True)
 		self.treeview.set_search_equal_func(self._handle_search)
+		
 		#try to enable the tooltips (available in pygtk 2.12 and above)
 		try: self.treeview.set_tooltip_column(DOC_INDEX)
 		except: pass
@@ -115,7 +134,7 @@ class BlockTreeWindow(gtk.VBox):
 			sub_category = category[:i+1]
 			if sub_category not in self._categories:
 				iter = self.treestore.insert_before(self._categories[sub_category[:-1]], None)
-				self.treestore.set_value(iter, NAME_INDEX, '[ %s ]'%cat_name)
+				self.treestore.set_value(iter, NAME_INDEX, ' %s '%cat_name)
 				self.treestore.set_value(iter, KEY_INDEX, '')
 				self.treestore.set_value(iter, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL, cat=cat_name))
 				self._categories[sub_category] = iter
