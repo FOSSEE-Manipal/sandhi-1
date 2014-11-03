@@ -55,7 +55,7 @@ class BlockTreeWindow(gtk.VBox):
 		#parse custom tree style to allow odd and even colour
                 gtk.rc_parse_string( """
                  style "custom-treestyle"{
-                         GtkTreeView::odd-row-color = "#b5cbbb"
+                         GtkTreeView::odd-row-color = "#ddedf4"
                          GtkTreeView::even-row-color = "#ddedf4"
                          GtkTreeView::allow-rules = 1
                  }
@@ -68,6 +68,7 @@ class BlockTreeWindow(gtk.VBox):
 		#set name to allow modified treeview
 		self.treeview.set_name("custom_treeview" )
 		self.treeview.set_rules_hint( True ) #allows alternating colours
+		self.treeview.set_enable_tree_lines(True) #draws lines from every node to it's children
 		self.treeview.set_enable_search(False) #disable pop up search box
 		#adding the selected block on enter key being pressed
 		self.treeview.add_events(gtk.gdk.KEY_PRESS_MASK)
@@ -82,7 +83,7 @@ class BlockTreeWindow(gtk.VBox):
 		self.treeview.append_column(column)
 		#format the font in the treeview
 		renderer.set_property('foreground', 'black')
-                renderer.set_property('xpad', 10)
+                renderer.set_property('xpad', 0)
                 renderer.set_property('weight', 3000)
                 renderer.set_property('family', 'Sans')
 		#setup the search
