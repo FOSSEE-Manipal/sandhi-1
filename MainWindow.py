@@ -234,9 +234,9 @@ class MainWindow(gtk.Window):
 				return
 		#stop the flow graph if executing
 		if self.page_to_be_closed.get_proc() and (ask==gtk.RESPONSE_YES or ask==gtk.RESPONSE_NO):
-		        Actions.FLOW_GRAPH_KILL()
+			 Actions.FLOW_GRAPH_KILL()
 		#remove the page
-		if ask==gtk.RESPONSE_NO or ask==gtk.RESPONSE_YES:
+		if (ask==gtk.RESPONSE_NO or ask==gtk.RESPONSE_YES):
 			self.notebook.remove_page(self.notebook.page_num(self.page_to_be_closed))
 		if ensure and self.notebook.get_n_pages() == 0: self.new_page() #no pages, make a new one
 		self.page_to_be_closed = None #set the page to be closed back to None
@@ -311,12 +311,12 @@ class MainWindow(gtk.Window):
 		Save changes to flow graph?
 		@return true if yes
 		"""
-		response = MessageDialogHelper(
+		return MessageDialogHelper(
 			gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, 'Unsaved Changes!',
 			'Would you like to save changes before closing?'
-		) 
-		
-		return response
+		)
+
+	def _get_files(self):
 		"""
 		Get the file names for all the pages, in order.
 		@return list of file paths
