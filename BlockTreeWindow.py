@@ -135,7 +135,7 @@ class BlockTreeWindow(gtk.VBox):
 			sub_category = category[:i+1]
 			if sub_category not in self._categories:
 				iter = self.treestore.insert_before(self._categories[sub_category[:-1]], None)
-				self.treestore.set_value(iter, NAME_INDEX, ' %s '%cat_name)
+				self.treestore.set_value(iter, NAME_INDEX, '%s'%cat_name)
 				self.treestore.set_value(iter, KEY_INDEX, '')
 				self.treestore.set_value(iter, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL, cat=cat_name))
 				self._categories[sub_category] = iter
@@ -149,6 +149,16 @@ class BlockTreeWindow(gtk.VBox):
 	############################################################
 	## Helper Methods
 	############################################################
+	def _get_selected_block_name(self):
+		"""
+                Get the currently selected block name.
+                @return the name of the selected block or a empty string
+                """
+		selection = self.treeview.get_selection()
+		treestore, iter = selection.get_selected()
+		return iter and treestore.get_value(iter, NAME_INDEX) or ''
+
+
 	def _get_selected_block_key(self):
 		"""
 		Get the currently selected block key.
@@ -204,11 +214,23 @@ class BlockTreeWindow(gtk.VBox):
 	def _handle_key_press(self, widget, event):
 		"""
 		Handle the enter key press.
-		If enter key is pressed, call add selected block.
+		if the selected block is a category name, expand/collapse the category.
+		If the selected block is a block name, call add selected block.
 		"""
 		if gtk.gdk.keyval_name(event.keyval) == 'Return'  and event.type == gtk.gdk.KEY_PRESS:
-			self._add_selected_block()
-
+			key=self._get_selected_block_key()
+			if key:
+				self._add_selected_block()
+			else:
+				name=self._get_selected_block_name()
+				if name!='':
+					path=self.treestore.get_path(self._categories[(name, )])	
+					if self.treeview.row_expanded(path)==True:
+						self.treeview.collapse_row(path)
+					else:
+						self.treeview.collapse_all()
+			        	        self.treeview.expand_row(path,open_all=False)
+	
 	def _handle_mouse_button_press(self, widget, event):
 		"""
 		Handle the mouse button press.
