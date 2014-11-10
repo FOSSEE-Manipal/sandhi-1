@@ -84,16 +84,19 @@ class Element(object):
 			aX = X + rX
 			aY = Y + rY
 			gc.set_foreground(bg_color)
+
 			window.draw_rectangle(gc, True, aX, aY, W, H)
+
 			gc.set_foreground(border_color)
-			window.draw_line(gc, aX+5, aY, aX+W-5, aY)
-			window.draw_arc(gc, False, aX, aY, 10, 10, 90*64, 90*64)
+			window.draw_rectangle(gc, False, aX, aY, W, H)
+			"""window.draw_line(gc, aX+5, aY, aX+W-5, aY)
+			window.draw_arc(gc, False, X, aY, 10, 10, 90*64, 90*64)
 			window.draw_arc(gc, False, aX, aY+H-10, 10, 10, 180*64, 90*64)
 			window.draw_arc(gc, False, aX+W-10, aY, 10, 10, 0, 90*64)
 			window.draw_arc(gc, False, aX+W-10, aY+H-10, 10, 10, 270*64, 90*64)
 			window.draw_line(gc, aX+5, aY+H, aX+W-5, aY+H)
 			window.draw_line(gc, aX, aY+5, aX, aY+H-5)
-			window.draw_line(gc, aX+W, aY+5, aX+W, aY+H-5)
+			window.draw_line(gc, aX+W, aY+5, aX+W, aY+H-5)"""
 		for (x1, y1),(x2, y2) in self._lines_list:
 			gc.set_foreground(border_color)
 			window.draw_line(gc, X+x1, Y+y1, X+x2, Y+y2)
@@ -113,7 +116,7 @@ class Element(object):
 			aY = Y + rY
 			
 			# Needs Tweaking
-			window.draw_pixbuf(None, pixbuf, 0,0, aX, aY, -1, -1) # (gc, pixbuf, src_x, src_y, dest_x, dest_y, W, H)
+			window.draw_pixbuf #(gc, pixbuf, src_x, src_y, dest_x, dest_y, W, H)#(None, pixbuf, 0,0, aX, aY, -1, -1) #
 			#window.draw_rectangle(gc, True, aX, aY, W, H)
 			gc.set_foreground(border_color)
 			#window.draw_rectangle(gc, False, aX, aY, W, H)
