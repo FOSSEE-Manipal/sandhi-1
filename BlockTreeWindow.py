@@ -234,7 +234,7 @@ class BlockTreeWindow(gtk.VBox):
 	def _handle_mouse_button_press(self, widget, event):
 		"""
 		Handle the mouse button press.
-		If a left double click is detected, expand/collapse the category or call add selected block.
+		If a left double click is detected, expand/collapse the selected category or call add selected block.
 		"""
 		if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
 			key=self._get_selected_block_key()
