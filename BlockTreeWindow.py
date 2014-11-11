@@ -99,7 +99,7 @@ class BlockTreeWindow(gtk.VBox):
 		#make the scrolled window to hold the tree view
 		scrolled_window = gtk.ScrolledWindow()
 		scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-		scrolled_window.add_with_viewport(self.treeview)
+		scrolled_window.add(self.treeview)
 		scrolled_window.set_size_request(DEFAULT_BLOCKS_WINDOW_WIDTH, -1)
 		self.pack_start(scrolled_window)
 		#add button
