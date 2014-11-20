@@ -90,10 +90,10 @@ class FlowGraph(Element):
 		v_adj = self.get_scroll_pane().get_vadjustment()
 		if coor is None: coor = (
 			#Change 3
-			int(0.5*h_adj.page_size + h_adj.get_value()),
-                        int(0.5*v_adj.page_size + v_adj.get_value()),
-			#int(random.uniform(.25, .75)*h_adj.page_size + h_adj.get_value()),
-			#int(random.uniform(.25, .75)*v_adj.page_size + v_adj.get_value()),
+			#int(0.5*h_adj.page_size + h_adj.get_value()),
+                        #int(0.5*v_adj.page_size + v_adj.get_value()),
+			int(random.uniform(.25, .75)*h_adj.page_size + h_adj.get_value()),
+			int(random.uniform(.25, .75)*v_adj.page_size + v_adj.get_value()),
 		)
 		#get the new block
 		block = self.get_new_block(key)
@@ -147,8 +147,9 @@ class FlowGraph(Element):
 		#Change5
 		#rootwin = widget.get_screen().get_root_window()
  		#x, y, mods = rootwin.get_pointer()
-		x_off = 10
-		y_off = 10
+		r_off = int(random.uniform(.1, .7)*100) #random offset value
+                x_off = r_off
+                y_off = r_off
 		#x_off = h_adj.get_value() - x_min + h_adj.page_size/5
 		#y_off = v_adj.get_value() - y_min + v_adj.page_size/5
 		#create blocks
