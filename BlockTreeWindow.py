@@ -23,6 +23,12 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
+global stack #to hold the selected blocks
+stack=[]
+global dict1 #to make sure duplicate block aren't added to recently used tab
+dict1={}
+global lens #to count the no of selected block in stacm
+lens=0
 
 NAME_INDEX = 0
 KEY_INDEX = 1
@@ -86,6 +92,9 @@ class BlockTreeWindow(gtk.VBox):
                 renderer.set_property('xpad', 0)
                 renderer.set_property('weight', 3000)
                 renderer.set_property('family', 'Sans')
+		#piter to append recently block		
+		global piter
+		piter = self.treestore.append(None, ['Recently Used','',''])
 		#setup the search
 		self.treeview.set_enable_search(True)
 		self.treeview.set_search_equal_func(self._handle_search)
@@ -121,6 +130,26 @@ class BlockTreeWindow(gtk.VBox):
 	############################################################
 	## Block Tree Methods
 	############################################################
+	def update_recently_used_tab(self):
+		"""
+		to dynamically update the recently used tab
+		when any block is added to flow graph
+		ensure only 5 recently used blocks are there
+		"""
+		global piter
+		global lens
+		global stack
+		if(lens>=5):
+			self.treestore.remove(piter)
+			piter = self.treestore.insert(None,0, ['Recently Used','',''])
+			self.treestore.insert(piter,0, ['%s' %stack[lens-5],'',''])
+			self.treestore.insert(piter,0,['%s' %stack[lens-4],'',''])
+			self.treestore.insert(piter,0, ['%s' %stack[lens-3],'',''])
+			self.treestore.insert(piter,0, ['%s' %stack[lens-2],'',''])
+            	self.treestore.insert(piter,0, ['%s' %stack[lens-1],'',''])	
+
+
+
 	def add_block(self, category, block=None):
 		"""
 		Add a block with category to this selection window.
@@ -157,7 +186,22 @@ class BlockTreeWindow(gtk.VBox):
 		selection = self.treeview.get_selection()
 		treestore, iter = selection.get_selected()
 		return iter and treestore.get_value(iter, NAME_INDEX) or ''
-
+	def return_name(self):
+		"""
+		Get the currently selected block name.
+		returns the name of block to add selected block
+		"""
+		selection = self.treeview.get_selection()
+		treestore, iter = selection.get_selected()
+		return treestore.get_value(iter, NAME_INDEX)
+	def get_iter(self):
+		"""
+		Get the currently selected block name
+		returns the name of header i.e the parent to add selected block
+		"""
+		selection = self.treeview.get_selection()
+		treestore, iter = selection.get_selected()
+		return iter
 
 	def _get_selected_block_key(self):
 		"""
@@ -179,10 +223,25 @@ class BlockTreeWindow(gtk.VBox):
 	def _add_selected_block(self):
 		"""
 		Add the selected block with the given key to the flow graph.
+		Add the block to the stack which is used to hold recently used blocks
+		Also ensures no duplicates are added and calss update_recently_used_tab to display the blocks
+		
 		"""
+		child_iter=self.get_iter()
+		check_ancestor=self.treestore.is_ancestor(piter,child_iter)
 		key = self._get_selected_block_key()
-		if key: self.get_flow_graph().add_new_block(key)
-
+		name=self.return_name()
+		if check_ancestor:
+			key1=dict1[name]
+			self.get_flow_graph().add_new_block(key1)
+		if not check_ancestor and not key=='' and not name in stack[lens-5:lens]:
+			if key: self.get_flow_graph().add_new_block(key)
+			global dict1			
+			dict1[name]=key
+			stack.append(name)
+			global lens 
+			lens+=1	
+			self.update_recently_used_tab()
 	############################################################
 	## Event Handlers
 	############################################################
@@ -208,9 +267,21 @@ class BlockTreeWindow(gtk.VBox):
 		This will call the destination handler for drag and drop.
 		Only call set when the key is valid to ignore DND from categories.
 		"""
+		child_iter=self.get_iter()
+		check_ancestor=self.treestore.is_ancestor(piter,child_iter)
 		key = self._get_selected_block_key()
-		if key: selection_data.set(selection_data.target, 8, key)
-	
+		name=self.return_name()
+		if check_ancestor:
+			key1=dict1[name]
+			self.get_flow_graph().add_new_block(key1)
+		if not check_ancestor and not key=='' and not name in stack[lens-5:lens]:
+			if key: self.get_flow_graph().add_new_block(key)
+			global dict1			
+			dict1[name]=key
+			stack.append(name)
+			global lens 
+			lens+=1	
+			self.update_recently_used_tab()
 	def _handle_key_press(self, widget, event):
 		"""
 		Handle the enter key press.
@@ -218,44 +289,61 @@ class BlockTreeWindow(gtk.VBox):
 		If the selected block is a block name, call add selected block.
 		"""
 		if gtk.gdk.keyval_name(event.keyval) == 'Return'  and event.type == gtk.gdk.KEY_PRESS:
-			key=self._get_selected_block_key()
-			if key:
-				self._add_selected_block()
-			else:
-				name=self._get_selected_block_name()
-				if name!='':
-					path=self.treestore.get_path(self._categories[(name, )])	
-					if self.treeview.row_expanded(path)==True:
+			
+			self._add_selected_block()	
+			name2=self._get_selected_block_name()				
+			name1=self._get_selected_block_key()
+			child_iter=self.get_iter()
+			check_ancestor=self.treestore.is_ancestor(piter,child_iter)
+			if not name1 and name2!='Recently Used' and not check_ancestor :	
+				path=self.treestore.get_path(self._categories[(name2, )])	
+				if self.treeview.row_expanded(path)==True:
 						self.treeview.collapse_row(path)
-					else:
-						self.treeview.collapse_all()
-			        	        self.treeview.expand_row(path,open_all=False)
-	
+				else:
+					self.treeview.collapse_all()
+	        	        	self.treeview.expand_row(path,open_all=False)
+			if not name1 and name2=='Recently Used' :
+				path=self.treestore.get_path(piter)	
+				if self.treeview.row_expanded(path)==True:
+						self.treeview.collapse_row(path)
+				else:
+					self.treeview.collapse_all()
+	        	        	self.treeview.expand_row(path,open_all=False)
+		
 	def _handle_mouse_button_press(self, widget, event):
 		"""
 		Handle the mouse button press.
 		If a left double click is detected, expand/collapse the selected category or call add selected block.
+		It only expands if it is a header block and not the child
 		"""
 		if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-			key=self._get_selected_block_key()
-			if key:
-				self._add_selected_block()
-			else:
-				name=self._get_selected_block_name()
-				if name!='':
-					path=self.treestore.get_path(self._categories[(name, )])	
-					if self.treeview.row_expanded(path)==True:
+			
+			self._add_selected_block()
+			name2=self._get_selected_block_name()
+			name1=self._get_selected_block_key()
+			child_iter=self.get_iter()
+			check_ancestor=self.treestore.is_ancestor(piter,child_iter)
+			if not name1 and name2!='Recently Used' and not check_ancestor:
+				path=self.treestore.get_path(self._categories[(name2, )])	
+				if self.treeview.row_expanded(path)==True:
 						self.treeview.collapse_row(path)
-					else:
-						self.treeview.collapse_all()
-			        	        self.treeview.expand_row(path,open_all=False)
-
+				else:
+					self.treeview.collapse_all()
+		        	        self.treeview.expand_row(path,open_all=False)
+			if not name1 and name2=='Recently Used' :
+				path=self.treestore.get_path(piter)	
+				if self.treeview.row_expanded(path)==True:
+						self.treeview.collapse_row(path)
+				else:
+					self.treeview.collapse_all()
+	        	        	self.treeview.expand_row(path,open_all=False)
+		
 	def _handle_selection_change(self, selection):
 		"""
 		Handle a selection change in the tree view.
 		If a selection changes, set the add button sensitive.
 		"""
-		self._update_add_button()
+#		self._update_add_button()
 
 	def _handle_add_button(self, widget):
 		"""
