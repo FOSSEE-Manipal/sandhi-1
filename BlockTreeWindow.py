@@ -227,6 +227,8 @@ class BlockTreeWindow(gtk.VBox):
 		Also ensures no duplicates are added and calss update_recently_used_tab to display the blocks
 		
 		"""
+		global dict1
+		global lens
 		child_iter=self.get_iter()
 		check_ancestor=self.treestore.is_ancestor(piter,child_iter)
 		key = self._get_selected_block_key()
@@ -235,11 +237,9 @@ class BlockTreeWindow(gtk.VBox):
 			key1=dict1[name]
 			self.get_flow_graph().add_new_block(key1)
 		if not check_ancestor and not key=='' and not name in stack[lens-5:lens]:
-			if key: self.get_flow_graph().add_new_block(key)
-			global dict1			
+			if key: self.get_flow_graph().add_new_block(key)			
 			dict1[name]=key
-			stack.append(name)
-			global lens 
+			stack.append(name) 
 			lens+=1	
 			self.update_recently_used_tab()
 	############################################################
@@ -267,6 +267,8 @@ class BlockTreeWindow(gtk.VBox):
 		This will call the destination handler for drag and drop.
 		Only call set when the key is valid to ignore DND from categories.
 		"""
+		global dict1
+		global lens 
 		child_iter=self.get_iter()
 		check_ancestor=self.treestore.is_ancestor(piter,child_iter)
 		key = self._get_selected_block_key()
@@ -275,11 +277,9 @@ class BlockTreeWindow(gtk.VBox):
 			key1=dict1[name]
 			self.get_flow_graph().add_new_block(key1)
 		if not check_ancestor and not key=='' and not name in stack[lens-5:lens]:
-			if key: self.get_flow_graph().add_new_block(key)
-			global dict1			
+			if key: self.get_flow_graph().add_new_block(key)			
 			dict1[name]=key
 			stack.append(name)
-			global lens 
 			lens+=1	
 			self.update_recently_used_tab()
 	def _handle_key_press(self, widget, event):
