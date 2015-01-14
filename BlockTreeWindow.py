@@ -226,7 +226,7 @@ class BlockTreeWindow(gtk.VBox):
 		Add the block to the stack which is used to hold recently used blocks
 		Also ensures no duplicates are added and calss update_recently_used_tab to display the blocks
 		
-		"""
+		"""	
 		global dict1
 		global lens
 		child_iter=self.get_iter()
@@ -234,14 +234,18 @@ class BlockTreeWindow(gtk.VBox):
 		key = self._get_selected_block_key()
 		name=self.return_name()
 		if check_ancestor:
+			flag=1
 			key1=dict1[name]
 			self.get_flow_graph().add_new_block(key1)
+		if not check_ancestor and not key=='' and name in stack[lens-5:lens]:
+			if key: self.get_flow_graph().add_new_block(key)
 		if not check_ancestor and not key=='' and not name in stack[lens-5:lens]:
 			if key: self.get_flow_graph().add_new_block(key)			
 			dict1[name]=key
 			stack.append(name) 
 			lens+=1	
 			self.update_recently_used_tab()
+					
 	############################################################
 	## Event Handlers
 	############################################################
@@ -317,7 +321,6 @@ class BlockTreeWindow(gtk.VBox):
 		It only expands if it is a header block and not the child
 		"""
 		if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-			
 			self._add_selected_block()
 			name2=self._get_selected_block_name()
 			name1=self._get_selected_block_key()
