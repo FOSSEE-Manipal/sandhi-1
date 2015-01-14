@@ -280,6 +280,8 @@ class BlockTreeWindow(gtk.VBox):
 		if check_ancestor:
 			key1=dict1[name]
 			self.get_flow_graph().add_new_block(key1)
+		if not check_ancestor and not key=='' and name in stack[lens-5:lens]:
+			if key: self.get_flow_graph().add_new_block(key)
 		if not check_ancestor and not key=='' and not name in stack[lens-5:lens]:
 			if key: self.get_flow_graph().add_new_block(key)			
 			dict1[name]=key
