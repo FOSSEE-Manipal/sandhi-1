@@ -268,12 +268,33 @@ class FlowGraph(Element):
                         max_x, max_y = max(max_x, x), max(max_y, y)
                 #calculate center point of selected blocks
                 ctr_x, ctr_y = (max_x + min_x)/2, (max_y + min_y)/2
+
+		#perform autoscrolling
+		width, height = self.get_size()
+		#x, y = coordinate
+		h_adj = self.get_scroll_pane().get_hadjustment()
+		v_adj = self.get_scroll_pane().get_vadjustment()
+		for pos, length, adj, adj_val, adj_len in (
+			(x, width, h_adj, h_adj.get_value(), h_adj.page_size),
+			(y, height, v_adj, v_adj.get_value(), v_adj.page_size),
+		):
+			#scroll if we moved near the border
+			if pos-adj_val > adj_len-SCROLL_PROXIMITY_SENSITIVITY and adj_val+SCROLL_DISTANCE < length-adj_len:
+				adj.set_value(adj_val+SCROLL_DISTANCE)
+				adj.emit('changed')
+			elif pos-adj_val < SCROLL_PROXIMITY_SENSITIVITY:
+				adj.set_value(adj_val-SCROLL_DISTANCE)
+				adj.emit('changed')
+
+
                 #move the blocks around the center point
                 for selected_block in self.get_selected_blocks():
                         x, y = selected_block.get_coordinate()
 			x, y = Utils.get_moved_coordinates((x, y), key)	
                         selected_block.set_coordinate((x, y))
-                return True
+		return True
+
+                
 
 	def remove_selected(self):
 		"""
@@ -555,3 +576,4 @@ class FlowGraph(Element):
 		self.set_coordinate((x, y))
 		#queue draw for animation
 		self.queue_draw()
+
