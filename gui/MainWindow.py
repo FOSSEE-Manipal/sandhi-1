@@ -57,6 +57,8 @@ PAGE_TITLE_MARKUP_TMPL = """\
  (ro)#slurp
 #end if
 """
+#global switch
+#switch = True
 
 ############################################################
 # Main window
@@ -102,12 +104,16 @@ class MainWindow(gtk.Window):
 		self.reports_scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		self.reports_scrolled_window.add_with_viewport(self.text_display)
 		self.reports_scrolled_window.set_size_request(-1, DEFAULT_REPORTS_WINDOW_WIDTH)
-		self.flow_graph_vpaned.pack2(self.reports_scrolled_window, False) #dont allow resize
+		self.flow_graph_vpaned.pack2(self.reports_scrolled_window, True) #dont allow resize
 		#load preferences and show the main window
 		Preferences.load(platform)
 		self.resize(*Preferences.main_window_size())
+		self.maximize()
 		self.flow_graph_vpaned.set_position(Preferences.reports_window_position())
 		self.hpaned.set_position(Preferences.blocks_window_position())
+		#print self.hpaned.get_position()
+
+		self.hpaned.set_position(1050)
 		self.show_all()
 
 	############################################################
@@ -293,6 +299,18 @@ class MainWindow(gtk.Window):
 		@return the focus flag
 		"""
 		return self.get_page().get_drawing_area().get_focus_flag()
+	def block_tree_hide(self, switch):
+
+		c = self.hpaned.get_position()
+		a = self.get_size()
+		b = int(a[0]*0.8)
+		if (switch==True):
+			self.hpaned.set_position(a[0])
+			#print self.hpaned.get_position()
+		else:
+			self.hpaned.set_position(b)
+			#print self.hpaned.get_position()
+		
 
 	############################################################
 	# Helpers

@@ -36,6 +36,7 @@ from FileDialogs import OpenFlowGraphFileDialog, SaveFlowGraphFileDialog, SaveIm
 
 gobject.threads_init()
 
+
 class ActionHandler:
 	"""
 	The action handler will setup all the major window components,
@@ -50,6 +51,7 @@ class ActionHandler:
 		@param file_paths a list of flow graph file passed from command line
 		@param platform platform module
 		"""
+		self.switch = False #used to hide the block tree when necessary
 		self.clipboard = None
 		for action in Actions.get_all_actions(): action.connect('activate', self._handle_action)
 		#setup the main window
@@ -456,6 +458,10 @@ class ActionHandler:
 			self.platform.loadblocks()
 			self.main_window.btwin.clear();
 			self.platform.load_block_tree(self.main_window.btwin);
+		elif action == Actions.BLOCK_TREE_HIDE:
+			self.switch = not(self.switch)
+			self.main_window.block_tree_hide(self.switch)
+			#print "You have managed to hide the BlockTreeWindow"
 		elif action == Actions.OPEN_HIER:
 			bn = [];
 			for b in self.get_flow_graph().get_selected_blocks():
@@ -481,6 +487,7 @@ class ActionHandler:
 		Actions.BLOCK_CREATE_HIER.set_sensitive(bool(self.get_flow_graph().get_selected_blocks()))
 		Actions.OPEN_HIER.set_sensitive(bool(self.get_flow_graph().get_selected_blocks()))
 		Actions.RELOAD_BLOCKS.set_sensitive(True)
+		Actions.BLOCK_TREE_HIDE.set_sensitive(True)
 		#set the exec and stop buttons
 		self.update_exec_stop()
 		#saved status

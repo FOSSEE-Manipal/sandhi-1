@@ -182,13 +182,13 @@ BLOCK_MOVE_LEFT_KEYBOARD = Action(
 )
 BLOCK_MOVE_UP_KEYBOARD = Action(
         label= 'Move Up',
-        tooltip = 'Move the selected to the up',
+        tooltip = 'Move the selected up',
         stock_id=gtk.STOCK_GO_UP,
         keypresses=(gtk.keysyms.Up, NO_MODS_MASK),
 )
 BLOCK_MOVE_DOWN_KEYBOARD = Action(
         label= 'Move Down',
-        tooltip = 'Move the selected to the down',
+        tooltip = 'Move the selected down',
         stock_id=gtk.STOCK_GO_DOWN,
         keypresses=(gtk.keysyms.Down, NO_MODS_MASK),
 )
@@ -274,6 +274,13 @@ FLOW_GRAPH_GEN = Action(
 	stock_id=gtk.STOCK_CONVERT,
 	keypresses=(gtk.keysyms.F5, NO_MODS_MASK),
 )
+BLOCK_TREE_HIDE = Action(
+        label='_Hide',
+        tooltip='Hide the Block Tree',
+        stock_id=gtk.STOCK_GOTO_LAST,
+        keypresses=(gtk.keysyms.h, gtk.gdk.CONTROL_MASK),
+)
+
 FLOW_GRAPH_EXEC = Action(
 	label='_Execute',
 	tooltip='Execute the flow graph',
