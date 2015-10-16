@@ -29,11 +29,12 @@ global dict1 #to make sure duplicate block aren't added to recently used tab
 dict1={}
 global lens #to count the no of selected block in stacm
 lens=0
-
+global categori #a global dictionary to direct which subcategories are shared with which main categories
+categori={'0000':(None,None,None,None),'0001':(None,None,None,'comp'),'0010':(None,None,'chem',None),'0100':(None,'electric',None,None),'1000':('mech',None,None,None),'1100':('mech','electric',None,None),'1010':('mech',None,'chem',None),'1001':('mech',None,None,'comp'),'0110':(None,'electric','chem',None),'0101':(None,'electric',None,'comp'),'0011':(None,None,'chem','comp'),'1110':('mech','electric','chem',None),'1011':('mech',None,'chem','comp'),'1101':('mech','electric',None,'comp'),'0111':(None,'electric','chem','comp'),'1111':('mech','electric','chem','comp')}
 NAME_INDEX = 0
 KEY_INDEX = 1
 DOC_INDEX = 2
-
+from xml.etree import ElementTree as ET #to open xml files of sub categories as a tree structure
 DOC_MARKUP_TMPL="""\
 #if $doc
 $encode($doc)#slurp
@@ -42,7 +43,7 @@ undocumented#slurp
 #end if"""
 
 CAT_MARKUP_TMPL="""Category: $cat"""
-
+CAT_MARKUP_TMPL1="""Main Category: $cat""" 
 class BlockTreeWindow(gtk.VBox):
 	"""The block selection panel."""
 
@@ -157,19 +158,32 @@ class BlockTreeWindow(gtk.VBox):
 			self.treestore.insert(piter,0,['%s' %stack[lens-4],'',''])
 			self.treestore.insert(piter,0, ['%s' %stack[lens-3],'',''])
 			self.treestore.insert(piter,0, ['%s' %stack[lens-2],'',''])
-            	self.treestore.insert(piter,0, ['%s' %stack[lens-1],'',''])     
-
-	
-	def add_block(self, category, block=None, treestore=None, categories=None):
+           	self.treestore.insert(piter,0,['%s'%stack[lens-1],'',''])     
+	def add_maincat(self):
+			"""
+			Add the  four main categories to the BlockTreeWindow
+			"""
+			global mech
+			mech = self.treestore.append(None, ['Mechanical','',''])
+			self.treestore.set_value(mech, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL1, cat='Mechanical'))
+			global electric
+			electric = self.treestore.append(None, ['Electrical','',''])
+			self.treestore.set_value(electric, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL1, cat='Electrical'))
+			global chem
+			chem = self.treestore.append(None, ['Chemical','',''])
+			self.treestore.set_value(chem, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL1, cat='Chemical'))
+			global comp 
+			comp=self.treestore.append(None, ['Computer','',''])
+			self.treestore.set_value(comp, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL1, cat='Computer'))
+	def add_block1(self, category, block=None, treestore=None, categories=None):
 
         	"""
 	        Add a block with category to this selection window.
         	Add only the category when block is None.
 	        Args:
-	            category: the category list or path string
-	            block: the block object or None
+	        category: the category list or path string
+	        block: the block object or None
         	"""
-
 	        if treestore is None: treestore = self.treestore
         	if categories is None: categories = self._categories
 	        if isinstance(category, str): category = category.split('/')
@@ -189,6 +203,85 @@ class BlockTreeWindow(gtk.VBox):
 	        treestore.set_value(iter, NAME_INDEX, block.get_name())
 	        treestore.set_value(iter, KEY_INDEX, block.get_key())
 	        treestore.set_value(iter, DOC_INDEX, Utils.parse_template(DOC_MARKUP_TMPL, doc=block.get_doc()))
+	def add_block(self, category, block=None):
+		"""
+		Add the sub-category under the main category
+		Add a block with sub-category to this selection window.
+		Add only the sub-category when block is None.
+		@param category the category list or path string
+		@param block the block object or None
+
+		"""
+
+		global iter_mech 
+		global iter_elec
+		global iter_chem
+		global iter_comp
+		if block is None: return
+		if isinstance(category, str): category = category.split('/')
+		category = tuple(filter(lambda x: x, category)) #tuple is hashable
+		#add category and all sub categories
+		
+		blo=category[0]
+		maincat="0000" # is used to store the retrieved value from xml files of sub-category
+		header=(None,None,None,None) # is the value from the dictionary dick_cat for key maincat of each subcategory
+		try:	
+			f=open("/usr/local/lib/python2.7/dist-packages/gnuradio/grc/gui/subcategories-xml/"+blo+".xml",'r') # to open the xml files
+			tree=ET.parse(f) # to make the xml file as tree structure
+			root=tree.getroot()
+			for child in root:
+				if child.tag=="param" and child[1].text=="Header": # extracting the value of key which determines the sharing of sub-categories
+					maincat=child[2].text
+		except:
+			pass
+		if not (maincat=='0000'):					
+			header=categori[maincat]
+		
+		for i, cat_name in enumerate(category):
+			sub_category = category[:i+1]
+			if sub_category not in self._categories:
+						for j in range(0,4):
+							if not(header[j]==None):
+								if(header[j]=='mech'):
+									iter_mech = self.treestore.insert(mech,0, ['%s' %cat_name,'',''])
+									self.treestore.set_value(iter_mech, NAME_INDEX, '[ %s ]'%cat_name)
+									self.treestore.set_value(iter_mech, KEY_INDEX, '')
+									self.treestore.set_value(iter_mech, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL, cat=cat_name))
+									self._categories[sub_category] = iter_mech
+								if(header[j]=='electric'):
+									iter_elec = self.treestore.insert(electric,0, ['%s' %cat_name,'',''])
+									self.treestore.set_value(iter_elec, NAME_INDEX, '[ %s ]'%cat_name)
+									self.treestore.set_value(iter_elec, KEY_INDEX, '')
+									self.treestore.set_value(iter_elec, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL, cat=cat_name))
+									self._categories[sub_category] = iter_elec
+								if(header[j]=='chem'):
+									iter_chem = self.treestore.insert(chem,0, ['%s' %cat_name,'',''])
+									self.treestore.set_value(iter_chem, NAME_INDEX, '[ %s ]'%cat_name)
+									self.treestore.set_value(iter_chem, KEY_INDEX, '')
+									self.treestore.set_value(iter_chem, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL, cat=cat_name))
+									self._categories[sub_category] = iter_chem
+								if(header[j]=='comp'):
+									iter_comp = self.treestore.insert(comp,0, ['%s' %cat_name,'',''])
+									self.treestore.set_value(iter_comp, NAME_INDEX, '[ %s ]'%cat_name)
+									self.treestore.set_value(iter_comp, KEY_INDEX, '')
+									self.treestore.set_value(iter_comp, DOC_INDEX, Utils.parse_template(CAT_MARKUP_TMPL, cat=cat_name))
+									self._categories[sub_category] = iter_comp
+
+							
+		#add a block
+		for j in range(0,4):
+			if not(header[j]==None):
+				if(header[j]=='mech'):
+					iter = self.treestore.insert_before(iter_mech, None)
+				if(header[j]=='electric'):
+					iter = self.treestore.insert_before(iter_elec, None)
+				if(header[j]=='chem'):
+					iter = self.treestore.insert_before(iter_chem, None)
+				if(header[j]=='comp'):
+					iter = self.treestore.insert_before(iter_comp, None)
+				self.treestore.set_value(iter, NAME_INDEX, block.get_name())
+				self.treestore.set_value(iter, KEY_INDEX, block.get_key())
+				self.treestore.set_value(iter, DOC_INDEX, Utils.parse_template(DOC_MARKUP_TMPL, doc=block.get_doc()))
 	 
 
 	############################################################
@@ -284,7 +377,7 @@ class BlockTreeWindow(gtk.VBox):
                     self.treestore_search.clear()
                     self._categories_search = {tuple(): None}
                     for block in matching_blocks:
-                        self.add_block(block.get_category() or 'None', block, self.treestore_search, self._categories_search)
+                        self.add_block1(block.get_category() or 'None', block, self.treestore_search, self._categories_search)
                     self.treeview.set_model(self.treestore_search)
                     self.treeview.expand_all()
 
@@ -402,3 +495,4 @@ class BlockTreeWindow(gtk.VBox):
 		Call add selected block.
 		"""
 		self._add_selected_block()
+
